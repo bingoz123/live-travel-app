@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Admin User Management</title>
+    <style>
+        table, th, td { border: 1px solid #ccc; border-collapse: collapse; padding: 6px; }
+        th { background: #f0f0f0; }
+    </style>
+</head>
+<body>
+    <h2>User Management</h2>
+    <h3>Add New User</h3>
+    <form id="addForm">
+        <input type="text" id="addUsername" placeholder="Username" required>
+        <input type="email" id="addEmail" placeholder="Email" required>
+        <input type="password" id="addPassword" placeholder="Password" required>
+        <button type="submit">Add</button>
+    </form>
+    <h3>User List</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th><th>Username</th><th>Email</th><th>Action</th>
+            </tr>
+        </thead>
+        <tbody id="userTableBody"></tbody>
+    </table>
+    <div id="editForm" style="display:none; margin-top:20px;">
+        <h3>Edit User</h3>
+        <input type="hidden" id="editUserId">
+        <input type="text" id="editUsername" placeholder="Username" required>
+        <input type="email" id="editEmail" placeholder="Email" required>
+        <button onclick="editUser()">Save</button>
+        <button type="button" onclick="document.getElementById('editForm').style.display='none'">Cancel</button>
+    </div>
+    <script>
+        async function fetchUsers() {
+            const res = await fetch('/admin/users');
+            const users = await res.json();
+            const tbody = document.getElementById('userTableBody');
+            tbody.innerHTML = users.map(u => `<tr><td>${u.user_id}</td><td>${u.username}</td><td>${u.email}</td><td><button onclick=\"showEdit(${u.user_id},'${u.username}','${u.email}')\">Edit</button><button onclick=\"deleteUser(${u.user_id})\">Delete</button></td></tr>`).join('');
+        }
+        fetchUsers();
+        document.getElementById('addForm').onsubmit = async function(e) {
+            e.preventDefault();
+            const username = document.getElementById('addUsername').value;
+            const email = document.getElementById('addEmail').value;
+            const password = document.getElementById('addPassword').value;
+            const res = await fetch('/admin/users', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, email, password })
+            });
+            alert(await res.text());
+            fetchUsers();
+            this.reset();
+        };
+        async function deleteUser(id) {
+            if (!confirm('Are you sure you want to delete this user?')) return;
+            const res = await fetch(`/admin/users/${id}`, { method: 'DELETE' });
+            alert(await res.text());
+            fetchUsers();
+        }
+        function showEdit(id, username, email) {
+            document.getElementById('editUserId').value = id;
+            document.getElementById('editUsername').value = username;
+            document.getElementById('editEmail').value = email;
+            document.getElementById('editForm').style.display = '';
+        }
+        async function editUser() {
+            const id = document.getElementById('editUserId').value;
+            const username = document.getElementById('editUsername').value;
+            const email = document.getElementById('editEmail').value;
+            const res = await fetch(`/admin/users/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, email })
+            });
+            alert(await res.text());
+            document.getElementById('editForm').style.display = 'none';
+            fetchUsers();
+        }
+        window.editUser = editUser;
+        window.deleteUser = deleteUser;
+        window.showEdit = showEdit;
+    </script>
+</body>
+</html>
