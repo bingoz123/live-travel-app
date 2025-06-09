@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Hotel Search</title>
+</head>
+<body>
+  <h2>Search Hotels</h2>
+  <input id="city" placeholder="City (e.g. Melbourne)">
+  <input id="checkin" type="date">
+  <input id="checkout" type="date">
+  <button onclick="searchHotels()">Search</button>
+
+  <h3>Results</h3>
+  <ul id="hotelList"></ul>
+
+  <script>
+    async function searchHotels() {
+      const city = document.getElementById('city').value;
+      const checkin = document.getElementById('checkin').value;
+      const checkout = document.getElementById('checkout').value;
+      const res = await fetch(`/api/hotels?city=${city}&checkin=${checkin}&checkout=${checkout}`);
+      const data = await res.json();
+      document.getElementById('hotelList').innerHTML = data.map(h =>
+        `<li>${h.name} - $${h.price.amount || '?'} - Score: ${h.score || 'N/A'}</li>`
+      ).join('');
+    }
+  </script>
+</body>
+</html>

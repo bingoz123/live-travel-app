@@ -16,33 +16,41 @@ app.use(bodyParser.json());
 app.use('/api/register', registerRoute);
 app.use('/api/admin',    adminRoute);
 
+
+
 // 外部 API 代理路由
 
 // 1. 演出列表 (Ticketmaster)
 app.get('/api/events', async (req, res) => {
   const city = req.query.city || 'Melbourne';
   const date = req.query.date || '2025-06-20';
+
   try {
-    const tm = await axios.get(
-      'https://app.ticketmaster.com/discovery/v2/events.json',
-      { params: {
-          apikey: process.env.TM_API_KEY,
-          city,
-          startDateTime: `${date}T00:00:00Z`
-      }}
-    );
-    const list = (tm.data._embedded?.events || []).map(ev => ({
-      id:    ev.id,
-      name:  ev.name,
-      date:  ev.dates.start.localDate,
-      venue: ev._embedded.venues[0].name
+    const response = await axios.get(`https://app.ticketmaster.com/discovery/v2/events.json`, {
+      params: {
+        apikey: process.env.TM_API_KEY,
+        city,
+        startDateTime: `${date}T00:00:00Z`,
+        endDateTime: `${date}T23:59:59Z`
+      }
+    });
+
+    const events = response.data._embedded?.events || [];
+    const formatted = events.map(e => ({
+      id: e.id,
+      name: e.name,
+      date: e.dates.start.localDate,
+      venue: e._embedded.venues[0].name
     }));
-    res.json(list);
+
+    res.json(formatted);
   } catch (err) {
     console.error('events error:', err.message);
-    res.status(500).json({ error: '无法获取演出数据' });
+    res.status(500).json({ error: 'Failed to fetch events' });
   }
 });
+
+
 
 // 2. 航班查询 (Amadeus)
 app.get('/api/flights', async (req, res) => {

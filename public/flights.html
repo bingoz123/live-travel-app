@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Flight Search</title>
+</head>
+<body>
+  <h2>Search Flights</h2>
+  <input id="origin" placeholder="Origin Code (e.g. SYD)">
+  <input id="dest" placeholder="Destination Code (e.g. MEL)">
+  <input id="date" type="date">
+  <button onclick="searchFlights()">Search</button>
+
+  <h3>Results</h3>
+  <ul id="flightList"></ul>
+
+  <script>
+    async function searchFlights() {
+      const origin = document.getElementById('origin').value;
+      const dest = document.getElementById('dest').value;
+      const date = document.getElementById('date').value;
+      const res = await fetch(`/api/flights?origin=${origin}&dest=${dest}&date=${date}`);
+      const data = await res.json();
+      document.getElementById('flightList').innerHTML = data.map(f =>
+        `<li>${f.airline} - ${f.price.total} - Depart at ${f.departAt}</li>`
+      ).join('');
+    }
+  </script>
+</body>
+</html>

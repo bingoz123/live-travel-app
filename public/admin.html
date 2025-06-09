@@ -61,7 +61,7 @@
 }
 
         async function fetchUsers() {
-            const res = await fetch('/admin/users');
+            const res = await fetch('/api/admin/users');
             const users = await res.json();
             const tbody = document.getElementById('userTableBody');
             tbody.innerHTML = users.map(u => `<tr><td>${u.user_id}</td><td>${u.username}</td><td>${u.email}</td><td><button onclick=\"showEdit(${u.user_id},'${u.username}','${u.email}')\">Edit</button><button onclick=\"deleteUser(${u.user_id})\">Delete</button></td></tr>`).join('');
@@ -72,7 +72,7 @@
             const username = document.getElementById('addUsername').value;
             const email = document.getElementById('addEmail').value;
             const password = document.getElementById('addPassword').value;
-            const res = await fetch('/admin/users', {
+            const res = await fetch('/api/admin/users', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, email, password })
@@ -83,7 +83,7 @@
         };
         async function deleteUser(id) {
             if (!confirm('Are you sure you want to delete this user?')) return;
-            const res = await fetch(`/admin/users/${id}`, { method: 'DELETE' });
+            const res = await fetch(`/api/admin/users/${id}`, { method: 'DELETE' });
             alert(await res.text());
             fetchUsers();
         }
@@ -97,7 +97,7 @@
             const id = document.getElementById('editUserId').value;
             const username = document.getElementById('editUsername').value;
             const email = document.getElementById('editEmail').value;
-            const res = await fetch(`/admin/users/${id}`, {
+            const res = await fetch(`/api/admin/users/${id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, email })

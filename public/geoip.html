@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>GeoIP Lookup</title>
+</head>
+<body>
+  <h2>GeoIP Result</h2>
+  <button onclick="getGeo()">Locate Me</button>
+  <p id="output"></p>
+
+  <script>
+    async function getGeo() {
+      const res = await fetch('/api/geoip');
+      const data = await res.json();
+      document.getElementById('output').innerText = `City: ${data.city}, Country: ${data.country}`;
+    }
+  </script>
+</body>
+</html>
