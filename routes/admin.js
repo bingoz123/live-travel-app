@@ -49,4 +49,25 @@ router.put('/users/:id', (req, res) => {
         });
 });
 
+// 5. 搜索用户（模糊查询用户名或邮箱）
+// admin.js 中
+router.get('/search', (req, res) => {
+    const keyword = req.query.keyword;
+    if (!keyword) return res.status(400).send('Missing keyword');
+
+    const sql = `
+        SELECT user_id AS user_id, username, email FROM users 
+        WHERE username LIKE ? OR email LIKE ?
+    `;
+    const like = `%${keyword}%`;
+    db.query(sql, [like, like], (err, results) => {
+        if (err) {
+            console.error('Search error:', err.message);
+            return res.status(500).json({ error: 'Database query failed' });
+        }
+        res.json(results);
+    });
+});
+
+
 module.exports = router;

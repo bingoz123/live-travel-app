@@ -17,6 +17,12 @@
         <input type="password" id="addPassword" placeholder="Password" required>
         <button type="submit">Add</button>
     </form>
+
+    <h3>Search Users</h3>
+    <input type="text" id="searchInput" placeholder="Enter keyword">
+    <button onclick="searchUsers()">Search</button>
+
+
     <h3>User List</h3>
     <table>
         <thead>
@@ -35,6 +41,25 @@
         <button type="button" onclick="document.getElementById('editForm').style.display='none'">Cancel</button>
     </div>
     <script>
+        async function searchUsers() {
+        const keyword = document.getElementById('searchInput').value.trim();
+        if (!keyword) return alert('Please enter a search keyword.');
+        const res = await fetch(`/admin/search?keyword=${encodeURIComponent(keyword)}`);
+        const users = await res.json();
+        const tbody = document.getElementById('userTableBody');
+        tbody.innerHTML = users.map(u => `
+            <tr>
+                <td>${u.user_id}</td>
+                <td>${u.username}</td>
+                <td>${u.email}</td>
+                <td>
+                    <button onclick="showEdit(${u.user_id}, '${u.username}', '${u.email}')">Edit</button>
+                    <button onclick="deleteUser(${u.user_id})">Delete</button>
+                </td>
+            </tr>
+        `).join('');
+}
+
         async function fetchUsers() {
             const res = await fetch('/admin/users');
             const users = await res.json();

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>演出列表</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <h2>即将到来的演出</h2>
+  城市：<input id="city" value="Melbourne">
+  日期：<input id="date" type="date" value="2025-06-20">
+  <button id="load">加载演出</button>
+  <div id="events">…</div>
+
+  <script>
+    async function load() {
+      const city = encodeURIComponent(document.getElementById('city').value);
+      const date = document.getElementById('date').value;
+      const res  = await fetch(`/api/events?city=${city}&date=${date}`);
+      const list = await res.json();
+      document.getElementById('events').innerHTML = list.length
+        ? list.map(ev => `
+            <div class="card">
+              <h3>${ev.name}</h3>
+              <p>${ev.date} @ ${ev.venue}</p>
+            </div>
+          `).join('')
+        : '<p>暂无演出</p>';
+    }
+    document.getElementById('load').onclick = load;
+    window.onload = load;
+  </script>
+</body>
+</html>
