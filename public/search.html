@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>User Search</title>
+  <style>
+    body {
+      font-family: Arial;
+      padding: 20px;
+    }
+    input, button {
+      padding: 8px;
+      margin: 5px 0;
+    }
+    table {
+      margin-top: 15px;
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+    }
+    th {
+      background-color: #f0f0f0;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Search Users</h2>
+
+  <input type="text" id="keyword" placeholder="Enter username or email">
+  <button onclick="searchUsers()">Search</button>
+
+  <table id="resultsTable" style="display: none;">
+    <thead>
+      <tr>
+        <th>User ID</th>
+        <th>Username</th>
+        <th>Email</th>
+      </tr>
+    </thead>
+    <tbody id="resultsBody"></tbody>
+  </table>
+
+  <p id="message"></p>
+
+  <script>
+    async function searchUsers() {
+      const keyword = document.getElementById('keyword').value.trim();
+      const message = document.getElementById('message');
+      const table = document.getElementById('resultsTable');
+      const tbody = document.getElementById('resultsBody');
+
+      if (!keyword) {
+        message.textContent = 'Please enter a keyword.';
+        table.style.display = 'none';
+        return;
+      }
+
+      try {
+        const res = await fetch(`/api/admin/search?keyword=${encodeURIComponent(keyword)}`);
+        const data = await res.json();
+
+        if (res.ok) {
+          if (data.length === 0) {
+            message.textContent = 'No users found.';
+            table.style.display = 'none';
+          } else {
+            tbody.innerHTML = data.map(user => `
+              <tr>
+                <td>${user.user_id}</td>
+                <td>${user.username}</td>
+                <td>${user.email}</td>
+              </tr>
+            `).join('');
+            message.textContent = '';
+            table.style.display = '';
+          }
+        } else {
+          message.textContent = data.error || 'Search failed.';
+          table.style.display = 'none';
+        }
+      } catch (err) {
+        console.error('Search error:', err);
+        message.textContent = 'Error occurred during search.';
+        table.style.display = 'none';
+      }
+    }
+  </script>
+
+</body>
+</html>

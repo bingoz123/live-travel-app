@@ -4,7 +4,7 @@ const mysql = require('mysql2');
 const db = mysql.createConnection({
   host:     process.env.DB_HOST   || '127.0.0.1',
   user:     process.env.DB_USER   || 'root',
-  password: process.env.DB_PASS   || '',
+  password: process.env.DB_PASS   || 'root',
   database: process.env.DB_NAME   || 'live_travel'
 });
 
@@ -17,3 +17,4 @@ db.connect(err => {
 });
 
 module.exports = db;
+

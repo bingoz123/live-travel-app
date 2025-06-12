@@ -12,19 +12,39 @@
   <button onclick="searchHotels()">Search</button>
 
   <h3>Results</h3>
-  <ul id="hotelList"></ul>
+  <ul id="results"></ul>
 
   <script>
     async function searchHotels() {
-      const city = document.getElementById('city').value;
+      const city = document.getElementById('city').value.trim();
       const checkin = document.getElementById('checkin').value;
       const checkout = document.getElementById('checkout').value;
-      const res = await fetch(`/api/hotels?city=${city}&checkin=${checkin}&checkout=${checkout}`);
-      const data = await res.json();
-      document.getElementById('hotelList').innerHTML = data.map(h =>
-        `<li>${h.name} - $${h.price.amount || '?'} - Score: ${h.score || 'N/A'}</li>`
-      ).join('');
+      const resultList = document.getElementById('results');
+
+      if (!city || !checkin || !checkout) {
+        alert('Please fill in all fields.');
+        return;
+      }
+
+      try {
+        const geoRes = await fetch(`/api/geo?city=${encodeURIComponent(city)}`);
+        const geo = await geoRes.json();
+        if (!geo.lat || !geo.lon) throw new Error('Failed to locate city');
+
+        const hotelRes = await fetch(`/api/hotels?lat=${geo.lat}&lon=${geo.lon}&checkin=${checkin}&checkout=${checkout}`);
+        const data = await hotelRes.json();
+
+        if (!Array.isArray(data)) throw new Error(data.error || 'Invalid hotel data');
+
+        resultList.innerHTML = data.map(h => `
+        <li>${h.name} - $${h.price} - Score: ${h.score}</li>
+        `).join('');
+      } catch (err) {
+        console.error('Hotel search failed:', err);
+        resultList.innerHTML = `<li style="color:red;">${err.message}</li>`;
+      }
     }
-  </script>
+</script>
+
 </body>
 </html>

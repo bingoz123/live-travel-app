@@ -16,14 +16,30 @@
 
   <script>
     async function searchFlights() {
-      const origin = document.getElementById('origin').value;
-      const dest = document.getElementById('dest').value;
+      const origin = document.getElementById('origin').value.trim();
+      const dest = document.getElementById('dest').value.trim();
       const date = document.getElementById('date').value;
-      const res = await fetch(`/api/flights?origin=${origin}&dest=${dest}&date=${date}`);
-      const data = await res.json();
-      document.getElementById('flightList').innerHTML = data.map(f =>
-        `<li>${f.airline} - ${f.price.total} - Depart at ${f.departAt}</li>`
-      ).join('');
+
+      if (!origin || !dest || !date) {
+        alert('Please fill in origin, destination, and date.');
+        return;
+      }
+
+      try {
+        const res = await fetch(`/api/flights?origin=${origin}&dest=${dest}&date=${date}`);
+        const data = await res.json();
+
+        if (!Array.isArray(data)) {
+          throw new Error(data.error || 'Unexpected response');
+        }
+
+        document.getElementById('flightList').innerHTML = data.map(f =>
+          `<li>${f.airline} - $${f.price} - Depart at ${f.departAt}</li>`
+        ).join('');
+      } catch (err) {
+        console.error('Flight search failed:', err);
+        document.getElementById('flightList').innerHTML = `<li style="color:red;">${err.message}</li>`;
+      }
     }
   </script>
 </body>

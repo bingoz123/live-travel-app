@@ -1,0 +1,35 @@
+body {
+    font-family: Arial, sans-serif;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+form div {
+    margin-bottom: 15px;
+}
+
+input {
+    padding: 8px;
+    width: 250px;
+}
+
+button {
+    padding: 8px 15px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+#captchaImage {
+    display: inline-block;
+    height: 40px;
+    width: 120px;
+    border: 1px solid #ddd;
+    vertical-align: middle;
+}

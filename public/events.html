@@ -4,8 +4,48 @@
   <meta charset="UTF-8">
   <title>Upcoming Performances</title>
   <link rel="stylesheet" href="styles.css">
+  <style>
+    .navbar {
+      background-color: #f0f0f0;
+      padding: 10px 15px;
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .navbar a {
+      margin-right: 15px;
+      text-decoration: none;
+      color: #333;
+    }
+    .navbar a:hover {
+      text-decoration: underline;
+    }
+    .user-section {
+      display: flex;
+      align-items: center;
+    }
+    .user-section button {
+      margin-left: 10px;
+      padding: 5px 10px;
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body>
+  <nav class="navbar">
+    <div class="nav-links">
+      <a href="/events.html">Performances</a>
+      <a href="/flights.html">Flights</a>
+      <a href="/hotels.html">Hotels</a>
+      <a href="/geoip.html">Location</a>
+    </div>
+    <div id="authLinks" class="user-section">
+      <a href="/login.html">Login</a>
+      <a href="/register.html">Register</a>
+    </div>
+  </nav>
+
   <h2>Upcoming Performances</h2>
   City: <input id="city" value="Melbourne">
   Date: <input id="date" type="date" value="2025-06-20">
@@ -13,6 +53,35 @@
   <div id="events">…</div>
 
   <script>
+    async function checkLoginStatus() {
+      try {
+        const res = await fetch('/api/login/status');
+        const data = await res.json();
+        
+        if (data.loggedIn) {
+          document.getElementById('authLinks').innerHTML = `
+            <span>Welcome, ${data.user.username}</span>
+            <button onclick="logout()">Logout</button>
+          `;
+        }
+      } catch (error) {
+        console.error('Failed to get login status:', error);
+      }
+    }
+    
+    async function logout() {
+      try {
+        const res = await fetch('/api/login/logout', { method: 'POST' });
+        const data = await res.json();
+        if (data.success) {
+          alert('Successfully logged out');
+          window.location.href = '/login.html'; // Redirect to login page after logout
+        }
+      } catch (error) {
+        console.error('Logout failed:', error);
+      }
+    }
+    
     async function load() {
       const city = encodeURIComponent(document.getElementById('city').value);
       const date = document.getElementById('date').value;
@@ -29,7 +98,12 @@
     }
 
     document.getElementById('load').onclick = load;
-    window.onload = load;
+    
+    // Execute when page loads
+    window.onload = function() {
+      load(); // Load performance information
+      checkLoginStatus(); // Check login status
+    };
   </script>
 </body>
 </html>
