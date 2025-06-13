@@ -1,20 +1,70 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>GeoIP Lookup</title>
+  <title>GeoIP Result</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    button {
+      padding: 8px 12px;
+      margin-bottom: 10px;
+    }
+    #output {
+      white-space: pre-line;
+      font-size: 16px;
+    }
+  </style>
 </head>
 <body>
+
   <h2>GeoIP Result</h2>
-  <button onclick="getGeo()">Locate Me</button>
+  <button onclick="locate()">Locate Me</button>
   <p id="output"></p>
 
   <script>
-    async function getGeo() {
-      const res = await fetch('/api/geoip');
-      const data = await res.json();
-      document.getElementById('output').innerText = `City: ${data.city}, Country: ${data.country}`;
+    function locate() {
+      const output = document.getElementById('output');
+      if (!navigator.geolocation) {
+        output.textContent = "Geolocation is not supported by your browser.";
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const { latitude, longitude } = position.coords;
+
+          output.textContent = `Latitude: ${latitude}, Longitude: ${longitude}`;
+
+          try {
+            const res = await fetch(
+              `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`,
+              {
+                headers: {
+                  'Accept-Language': 'en'  // 强制英文地址
+                }
+              }
+            );
+            const data = await res.json();
+            output.textContent += `\nAddress: ${data.display_name}`;
+          } catch (error) {
+            output.textContent += `\n⚠️ Failed to retrieve address.`;
+            console.error(error);
+          }
+        },
+        (err) => {
+          output.textContent = `Location error: ${err.message}`;
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 8000,
+          maximumAge: 0
+        }
+      );
     }
   </script>
+
 </body>
 </html>

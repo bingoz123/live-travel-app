@@ -178,14 +178,18 @@ app.get('/api/hotels', async (req, res) => {
 // 4. 地理定位 (IP → 城市)
 app.get('/api/geoip', async (req, res) => {
   try {
-    const ip = (req.ip === '::1' ? '117.136.0.1' : req.ip);
-    const geoRes = await axios.get(`https://ipapi.co/${ip}/json/`);
+    const ip = (req.headers['x-forwarded-for'] || req.ip || '').replace('::ffff:', '').replace('::1', '');
+    const fallbackIp = '8.8.8.8';  // 默认 IP（可选）
+    const targetIp = ip || fallbackIp;
+
+    const geoRes = await axios.get(`https://ipapi.co/${targetIp}/json/`);
     res.json({ city: geoRes.data.city, country: geoRes.data.country_name });
   } catch (err) {
     console.error('geoip error:', err.message);
     res.status(500).json({ error: '定位失败' });
   }
 });
+
 
 // 静态文件
 app.use(express.static('public'));
